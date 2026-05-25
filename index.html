@@ -285,7 +285,7 @@ rat:"DVT management priorities: prevent embolism (no massage, bed rest), anticoa
 
 {id:60,mod:3,type:"mcq",stem:"A nurse uses the client's adult child as an interpreter during a discussion about a newly diagnosed serious illness. Which statement about this practice is correct?",opts:["This is the preferred method — family members understand the client's values and context best","This is acceptable as long as the family member is fluent in both languages","This practice violates standards of care — a certified medical interpreter should be used","This is acceptable in emergencies but should be avoided for routine health discussions"],ans:2,why:["Family members may filter, omit, or add information — and may be emotionally unable to translate accurately during a serious illness disclosure.","Fluency alone does not make a family member an appropriate medical interpreter — medical accuracy and neutrality are also required.","✓ Using family members as interpreters is a violation of language access standards. Certified medical interpreters ensure accuracy, confidentiality, and neutrality. Title VI of the Civil Rights Act requires free interpreter services.","The standard applies to all clinical discussions — not just emergencies. Sensitive information (diagnosis, prognosis, consent) especially requires a certified interpreter."],rat:"Medical interpreter services are legally required for limited English proficiency patients (Title VI, Joint Commission standards). Family interpreters may withhold information, introduce bias, lack medical vocabulary, or place themselves in an unfair role.",pearl:"Professional medical interpretation services: in-person interpreters, video remote interpreting (VRI), telephone interpretation (AT&T Language Line — 200+ languages, 24/7). NEVER use a child as an interpreter for a parent's medical care."},
 
-{id:61,mod:1,type:"mcq",stem:"A hospice nurse explains hospice to a family. Which statement BEST describes hospice care?",opts:["Titrate the morphine down by half to prevent respiratory depression","Withhold all opioids until the client can verbalize their pain level using a numeric scale","Use behavioral pain indicators such as grimacing, guarding, and vital sign changes to assess pain","Administer acetaminophen only, as opioids are inappropriate in clients who cannot speak"],ans:1,why:["Hospice is NOT giving up — it is a meaningful, active shift in the GOAL of care from curing to comfort and quality of life.","✓ Hospice: comfort-focused interdisciplinary care (nursing, social work, chaplaincy, aide, bereavement) for prognosis ≤6 months, patient/family choose comfort over curative treatment.","Hospice is for any terminal diagnosis and typically for months, not just 24 hours.","Hospice is most often provided in the patient's OWN HOME — home, nursing facility, or dedicated hospice."],rat:"Hospice eligibility: prognosis ≤6 months (physician certified), patient/family chooses comfort over cure. Medicare Hospice Benefit covers medications, nursing, social work, aide, chaplaincy, bereavement for 13 months after death.",pearl:"Palliative care vs. hospice: Palliative = comfort alongside curative treatment at any stage. Hospice = specialized palliative care when curative treatment is stopped, prognosis ≤6 months. NCLEX commonly tests this distinction."},
+{id:61,mod:1,type:"mcq",stem:"A hospice nurse explains hospice to a family. Which statement BEST describes hospice care?",opts:["Hospice care means giving up — it is appropriate only when the family has accepted that death is imminent within 24 hours","Hospice is comfort-focused interdisciplinary care for clients with a prognosis of 6 months or less who choose comfort over curative treatment","Hospice care is reserved for clients with cancer diagnoses only and is typically provided in a hospital setting","Hospice is provided exclusively in dedicated inpatient hospice facilities, not in the client's home"],ans:1,why:["Hospice is NOT giving up — it is a meaningful, active shift in the GOAL of care from curing to comfort and quality of life.","✓ Hospice: comfort-focused interdisciplinary care (nursing, social work, chaplaincy, aide, bereavement) for prognosis ≤6 months, patient/family choose comfort over curative treatment.","Hospice is for any terminal diagnosis and typically for months, not just 24 hours.","Hospice is most often provided in the patient's OWN HOME — home, nursing facility, or dedicated hospice."],rat:"Hospice eligibility: prognosis ≤6 months (physician certified), patient/family chooses comfort over cure. Medicare Hospice Benefit covers medications, nursing, social work, aide, chaplaincy, bereavement for 13 months after death.",pearl:"Palliative care vs. hospice: Palliative = comfort alongside curative treatment at any stage. Hospice = specialized palliative care when curative treatment is stopped, prognosis ≤6 months. NCLEX commonly tests this distinction."},
 
 {id:62,mod:2,type:"mcq",stem:"A nurse is caring for a client with a confirmed deep vein thrombosis of the left lower extremity. Which intervention is most appropriate?",opts:["Massage the affected leg with warm oil to reduce thrombus size and improve circulation","Encourage the client to ambulate in the hallway to prevent further clot propagation","Maintain bed rest, elevate the extremity, avoid massaging, and notify the provider","Apply a compression wrap to the affected leg and encourage active range of motion"],ans:2,why:["Massaging a DVT risks dislodging the clot and causing a pulmonary embolism — never massage.","Ambulation is contraindicated until therapeutic anticoagulation is established.","✓ Acute DVT management: bed rest (until anticoagulated), elevate the extremity to reduce edema, NO massage, notify provider for anticoagulation orders. Monitor for signs of PE (sudden dyspnea, chest pain, tachycardia).","Compression and active exercise are contraindicated with acute untreated DVT."],rat:"Conscientious objection: nurses may seek reassignment for procedures conflicting with deeply held moral beliefs, ONLY IF patient is not abandoned and standard of care is maintained. Refusing all care is NOT acceptable.",pearl:"ANA Code of Ethics Provision 1: Respect patient dignity and worth. Provision 5: Maintain own integrity. These provisions must be balanced — patient welfare always takes precedence over nurse's personal values."},
 
@@ -357,6 +357,18 @@ function startExam(){
     }
   });
   if(pool.length===0){alert('Please select at least 1 question from any module.');return;}
+  QB.forEach(q=>{
+    delete q._pending;
+    delete q._shuffleMap;
+    delete q._shuffleOpts;
+    delete q._shuffleWhy;
+    delete q._shuffleAns;
+    delete q._pendingSATA;
+    delete q._btCond;
+    delete q._btActs;
+    delete q._btParams;
+    delete q._hsSelected;
+  });
   state.exam=shuffle(pool);
   state.idx=0;
   state.answers={};
@@ -441,7 +453,8 @@ function renderQ(){
 
   // nav
   html+=`<div class="navrow">
-    <button class="btn btn-s" onclick="navQ(-1)" ${state.idx===0?'disabled':''}>← Back</button>`;
+    <button class="btn btn-s" onclick="navQ(-1)" ${state.idx===0?'disabled':''}>← Back</button>
+    <button class="btn btn-s" onclick="exitExam()" style="background:transparent;border:1.5px solid var(--tx3);color:var(--tx3)">✕ Exit Exam</button>`;
   if(saved===undefined){
     if(q.type==='bowtie'){
       html+=`<button class="btn btn-p" onclick="submitBowtie('${q.id}')">Submit Answer</button>`;
@@ -490,7 +503,7 @@ function renderMCQ(q,saved){
 }
 
 function renderSATA(q,saved){
-  const letters='ABCDE';
+  const letters='ABCDEFGH';
   let html=`<div class="sata-hint">Select all that apply. Partial credit given for correct selections.</div><ul class="opts">`;
   html+=q.opts.map((opt,i)=>{
     let cls='opt';
@@ -653,6 +666,22 @@ function submitAnswer(qid,type){
 
   updateWrongSec();
   renderQ();
+}
+
+function exitExam(){
+  // Custom confirm — browser confirm() blocked in iframes
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML='<div style="background:#fff;border-radius:14px;padding:28px 32px;max-width:340px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.25)">'
+    +'<div style="font-size:1.1rem;font-weight:600;margin-bottom:10px">Exit exam?</div>'
+    +'<div style="color:#666;font-size:.9rem;margin-bottom:22px">Your progress on this attempt will be lost.</div>'
+    +'<div style="display:flex;gap:10px;justify-content:center">'
+    +'<button id="exitNo" style="padding:9px 22px;border-radius:8px;border:1.5px solid #ccc;background:#fff;cursor:pointer;font-size:.9rem">Keep going</button>'
+    +'<button id="exitYes" style="padding:9px 22px;border-radius:8px;border:none;background:#c0392b;color:#fff;cursor:pointer;font-size:.9rem;font-weight:600">Exit</button>'
+    +'</div></div>';
+  document.body.appendChild(overlay);
+  document.getElementById('exitNo').onclick=function(){document.body.removeChild(overlay);};
+  document.getElementById('exitYes').onclick=function(){document.body.removeChild(overlay);showScreen('home');};
 }
 
 function navQ(dir){
@@ -1917,7 +1946,7 @@ pearl:"Drop factor shortcuts: 10 gtt/mL → divide mL/hr by 6. 15 gtt/mL → div
 
 {id:197,mod:3,type:"mcq",
 stem:"Which statement about IV SITE SELECTION is correct?",
-opts:["Change all IV tubing every 24 hours regardless of type, solution, or client condition","Scrub the needleless connector with chlorhexidine or 70% alcohol using friction for at least 15 seconds before every access","Use the same IV tubing set for up to 14 days to reduce waste and unnecessary manipulations","Keep the IV site covered at all times and avoid visual inspection to minimize contamination"],
+opts:["Use the antecubital fossa as the preferred site for all continuous IV infusions due to easy access","Lower extremity veins are an acceptable alternative when upper extremity access is unavailable in adult clients","Never use the arm with an arteriovenous (AV) fistula for IV access, blood draws, or blood pressure measurement","Insert the IV in the dominant arm to allow the client to use their preferred hand freely during the infusion"],
 ans:2,
 why:["The AC fossa is associated with high complication rates (phlebitis, infiltration, catheter kinking with arm movement) and limits patient mobility — avoid for routine PIV access.","Lower extremity veins in adults carry HIGH risk of DVT and thrombophlebitis — avoid unless no upper extremity access is possible.","✓ IV lecture on sites to avoid: NEVER use the arm with an AV fistula — no IV access, no blood draws, no blood pressure. The fistula is the dialysis patient's lifeline; any intervention risks thrombosis, infection, or permanent damage.","The NON-dominant arm is preferred to preserve function and patient comfort."],
 rat:"IV site selection hierarchy (distal to proximal, non-dominant preferred): dorsal hand veins → forearm (cephalic, basilic, median) → antecubital (last resort for peripheral). Sites to AVOID: AV fistula arm, mastectomy-side arm, paralyzed limb, infected/burned areas, lower extremities (DVT risk), existing phlebitis.",
